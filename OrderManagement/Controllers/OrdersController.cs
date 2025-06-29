@@ -101,5 +101,33 @@ namespace OrderManagement.Controllers
             var discount = _discountService.ApplyDiscount(order, order.Customer);
             return Ok(discount);
         }
+
+        /// <summary>
+        /// Create a new order for a customer.
+        /// </summary>
+        /// <param name="dto">Order creation data</param>
+        [HttpPost]
+        [ProducesResponseType(typeof(OrderDto), 201)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto dto)
+        {
+            var customer = await _context.Customers.FindAsync(dto.CustomerId);
+            if (customer == null)
+                return BadRequest("Customer not found.");
+
+            var order = new Order
+            {
+                Id = Guid.NewGuid(),
+                CustomerId = dto.CustomerId,
+                Total = dto.Total,
+                Status = OrderStatus.Pending,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+
+            var orderDto = _mapper.Map<OrderDto>(order);
+            return CreatedAtAction(nameof(GetOrders), new { id = order.Id }, orderDto);
+        }
     }
 }

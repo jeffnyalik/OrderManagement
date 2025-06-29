@@ -170,6 +170,7 @@ POST /api/orders/456e7890-e89b-12d3-a456-426614174000/discount
 
 ### Orders
 - `GET /api/orders` - Get all orders (with optional customer filter)
+- `POST /api/orders` - Create new order
 - `PUT /api/orders/{id}/status` - Update order status
 - `GET /api/orders/analytics` - Get order analytics
 - `POST /api/orders/{id}/discount` - Calculate discount for order
@@ -181,4 +182,4 @@ For questions or suggestions, please open an issue or submit a pull request.
 
 Below is a screenshot of the automatically generated Swagger UI for this project:
 
-![Swagger UI Screenshot](swagger.png)
+![Swagger UI Screenshot](/OrderManagement/images/swagger.png)

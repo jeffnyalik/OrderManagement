@@ -170,6 +170,7 @@ POST /api/orders/456e7890-e89b-12d3-a456-426614174000/discount
 
 ### Orders
 - `GET /api/orders` - Get all orders (with optional customer filter)
+- `POST /api/orders` - Create new order
 - `PUT /api/orders/{id}/status` - Update order status
 - `GET /api/orders/analytics` - Get order analytics
 - `POST /api/orders/{id}/discount` - Calculate discount for order
