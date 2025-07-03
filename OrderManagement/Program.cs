@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using OrderManagement.Data;
 using OrderManagement.Services;
 using OrderManagement.Services.Discount;
+using OrderManagement.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,8 @@ builder.Services.AddScoped<IDiscountStrategy, NewCustomerDiscount>();
 builder.Services.AddScoped<IDiscountStrategy, VipCustomerDiscount>();
 builder.Services.AddScoped<DiscountService>();
 builder.Services.AddScoped<OrderAnalyticsService>();
+builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<CustomerService>();
 builder.Services.AddAutoMapper(typeof(Program).Assembly); // Register AutoMapper with the current assembly
 
 // Add services to the container.
@@ -48,6 +51,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.MapControllers();
 

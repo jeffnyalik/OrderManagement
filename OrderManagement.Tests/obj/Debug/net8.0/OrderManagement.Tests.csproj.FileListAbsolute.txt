@@ -433,3 +433,4 @@ C:\work_space\sharps\OrderApp\OrderManagement.Tests\obj\Debug\net8.0\refint\Orde
 C:\work_space\sharps\OrderApp\OrderManagement.Tests\obj\Debug\net8.0\OrderManagement.Tests.pdb
 C:\work_space\sharps\OrderApp\OrderManagement.Tests\obj\Debug\net8.0\OrderManagement.Tests.genruntimeconfig.cache
 C:\work_space\sharps\OrderApp\OrderManagement.Tests\obj\Debug\net8.0\ref\OrderManagement.Tests.dll
+C:\work_space\sharps\OrderApp\OrderManagement.Tests\obj\Debug\net8.0\OrderManagement.Tests.sourcelink.json

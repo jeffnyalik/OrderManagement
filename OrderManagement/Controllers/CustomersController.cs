@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using OrderManagement.Data;
 using OrderManagement.Dtos;
 using OrderManagement.Models;
+using OrderManagement.Services;
 
 namespace OrderManagement.Controllers
 {
@@ -14,11 +15,13 @@ namespace OrderManagement.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
+        private readonly CustomerService _customerService;
 
-        public CustomersController(AppDbContext context, IMapper mapper)
+        public CustomersController(AppDbContext context, IMapper mapper, CustomerService customerService)
         {
             _context = context;
             _mapper = mapper;
+            _customerService = customerService;
         }
 
         /// <summary>
@@ -41,14 +44,9 @@ namespace OrderManagement.Controllers
         [ProducesResponseType(400)]
         public async Task<IActionResult> CreateCustomer([FromBody] CustomerCreateDto dto)
         {
-            var customer = _mapper.Map<Customer>(dto);
-            customer.Id = Guid.NewGuid();
-            customer.OrderCount = 0;
-            customer.TotalSpent = 0;
-
-            _context.Customers.Add(customer);
-            await _context.SaveChangesAsync();
-
+            var customer = await _customerService.CreateCustomerAsync(dto);
+            if (customer == null)
+                return BadRequest("Could not create customer.");
             var resultDto = _mapper.Map<CustomerDto>(customer);
             return CreatedAtAction(nameof(GetCustomerById), new { id = customer.Id }, resultDto);
         }
@@ -61,14 +59,9 @@ namespace OrderManagement.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> UpdateCustomer(Guid id, [FromBody] CustomerUpdateDto dto)
         {
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = await _customerService.UpdateCustomerAsync(id, dto);
             if (customer == null)
                 return NotFound();
-
-            customer.Name = dto.Name;
-
-            await _context.SaveChangesAsync();
-
             var updatedDto = _mapper.Map<CustomerDto>(customer);
             return Ok(updatedDto);
         }

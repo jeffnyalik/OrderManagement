@@ -18,19 +18,22 @@ namespace OrderManagement.Controllers
         private readonly AppDbContext _context;
         private readonly DiscountService _discountService;
         private readonly IMapper _mapper;
+        private readonly OrderService _orderService;
 
         public OrdersController(
             AppDbContext context, DiscountService discountService,
-            IMapper mapper
+            IMapper mapper,
+            OrderService orderService
             )
         {
             _context = context;
             _discountService = discountService;
             _mapper = mapper;
+            _orderService = orderService;
         }
 
         /// <summary>
-        /// Get all orders, optionally filtered by customerId.
+        /// Get all orders, optionally filtered by customerId
         /// </summary>
         /// <param name="customerId">Optional filter by customer ID</param>
         [HttpGet]
@@ -51,31 +54,22 @@ namespace OrderManagement.Controllers
         }
 
         /// <summary>
-        /// Update order status with valid state transitions.
+        /// Update order status with valid state transitions
         /// </summary>
         [HttpPut("{id}/status")]
         [ProducesResponseType(typeof(Order), 200)]
         [ProducesResponseType(400)]
         public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] OrderStatus newStatus)
         {
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null) return NotFound();
-
-            if (!order.canTransitionTo(newStatus))
-                return BadRequest("Invalid status transition.");
-
-            order.Status = newStatus;
-            if (newStatus == OrderStatus.Delivered)
-                order.DeliveredAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-            // Map to DTO for response
+            var order = await _orderService.UpdateStatusAsync(id, newStatus);
+            if (order == null)
+                return BadRequest("Invalid status transition or order not found.");
             var orderDto = _mapper.Map<OrderDto>(order);
             return Ok(orderDto);
         }
 
         /// <summary>
-        /// Get order analytics including average order value and fulfillment time.
+        /// Get order analytics including average order value and fulfillment time
         /// </summary>
         [HttpGet("analytics")]
         [ProducesResponseType(200)]
@@ -86,7 +80,7 @@ namespace OrderManagement.Controllers
         }
 
         /// <summary>
-        /// Calculate applicable discount for a customer's order.
+        /// Calculate applicable discount for a customer's order
         /// </summary>
         [HttpPost("{id}/discount")]
         [ProducesResponseType(typeof(decimal), 200)]
@@ -103,7 +97,7 @@ namespace OrderManagement.Controllers
         }
 
         /// <summary>
-        /// Create a new order for a customer.
+        /// Create a new order for a customer
         /// </summary>
         /// <param name="dto">Order creation data</param>
         [HttpPost]
@@ -111,21 +105,9 @@ namespace OrderManagement.Controllers
         [ProducesResponseType(400)]
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto dto)
         {
-            var customer = await _context.Customers.FindAsync(dto.CustomerId);
-            if (customer == null)
+            var order = await _orderService.CreateOrderAsync(dto);
+            if (order == null)
                 return BadRequest("Customer not found.");
-
-            var order = new Order
-            {
-                Id = Guid.NewGuid(),
-                CustomerId = dto.CustomerId,
-                Total = dto.Total,
-                Status = OrderStatus.Pending,
-                CreatedAt = DateTime.UtcNow
-            };
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
-
             var orderDto = _mapper.Map<OrderDto>(order);
             return CreatedAtAction(nameof(GetOrders), new { id = order.Id }, orderDto);
         }

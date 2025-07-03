@@ -12,12 +12,5 @@ namespace OrderManagement.Models
         public DateTime? DeliveredAt { get; set; }
         public decimal Total { get; set; }
         public OrderStatus Status { get; set; }
-
-        public bool canTransitionTo(OrderStatus newStatus)
-        {
-            return (Status == OrderStatus.Pending && newStatus == OrderStatus.Processing) ||
-                   (Status == OrderStatus.Processing && newStatus == OrderStatus.Delivered) ||
-                   (Status == OrderStatus.Delivered && newStatus == OrderStatus.Completed);
-        }
     }
 }
